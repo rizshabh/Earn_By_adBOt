@@ -55,7 +55,7 @@ app.get('/api/user/:telegramId', async (req, res) => {
   }
 });
 
-// Ad Redirect Endpoint (Direct link / smartlink monetization)
+// Direct Ad Execution (Pure Monetag popup with zero intermediate UI)
 app.get('/ad/go/:token', async (req, res) => {
   const token = req.params.token;
   const directUrl = process.env.DIRECT_AD_URL;
@@ -64,54 +64,47 @@ app.get('/ad/go/:token', async (req, res) => {
     return res.redirect(directUrl);
   }
 
-  // If no external direct link is set, serve a dedicated Monetag sponsored ad landing page
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Sponsored Ad</title>
+      <title>Playing Sponsored Ad</title>
       <!-- Monetag Rewarded Ad SDK (Zone 11718056) -->
       <script src="//libtl.com/sdk.js" data-zone="11718056" data-sdk="show_11718056"></script>
       <style>
-        body { margin: 0; background: #0a0e17; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; }
-        .box { background: #162035; border: 1px solid #00e5ff; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(0,229,255,0.15); }
-        h2 { margin-top: 0; color: #00e5ff; }
-        .timer { font-size: 2.2rem; font-weight: bold; color: #ffd600; margin: 16px 0; }
-        .btn { display: inline-block; background: #00e676; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 16px; font-size: 1.1rem; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        .spinner { width: 48px; height: 48px; border: 4px solid rgba(0,229,255,0.2); border-top-color: #00e5ff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .text { font-size: 1.1rem; color: #94a3b8; }
       </style>
     </head>
     <body>
-      <div class="box">
-        <h2>🎬 Sponsored Video Ad</h2>
-        <p>Aapka Monetag ad load ho raha hai. Countdown pura hone par reward claim karein.</p>
-        <div class="timer" id="timer">5s</div>
-        <div id="cta" style="display: none;">
-          <p style="color: #00e676; font-weight: bold; font-size: 1.1rem;">✅ Ad Complete!</p>
-          <p style="color: #94a3b8; font-size: 0.9rem;">Telegram par jakar <strong>Claim Reward</strong> dabayein.</p>
-          <a href="https://t.me/Earn_By_adBOt" class="btn">Telegram Me Wapas Jayein ➔</a>
-        </div>
-      </div>
-      <script>
-        // Auto-trigger Monetag Rewarded Popup
-        window.addEventListener('load', () => {
-          if (typeof show_11718056 === 'function') {
-            show_11718056('pop').catch(e => console.log('Monetag ad notice:', e));
-          }
-        });
+      <div class="spinner"></div>
+      <div class="text" id="statusText">🎬 Ad load ho raha hai...</div>
 
-        let count = 5;
-        const t = setInterval(() => {
-          count--;
-          if (count > 0) {
-            document.getElementById('timer').innerText = count + 's';
+      <script>
+        let adTriggered = false;
+        function runAd() {
+          if (adTriggered) return;
+          if (typeof show_11718056 === 'function') {
+            adTriggered = true;
+            document.getElementById('statusText').innerText = 'Ad chal raha hai...';
+            show_11718056('pop').then(() => {
+              document.getElementById('statusText').innerText = '✅ Ad complete! Telegram par wapas ja rahe hain...';
+              setTimeout(() => {
+                window.location.href = 'https://t.me/Earn_By_adBOt';
+              }, 800);
+            }).catch(() => {
+              window.location.href = 'https://t.me/Earn_By_adBOt';
+            });
           } else {
-            clearInterval(t);
-            document.getElementById('timer').innerText = 'COMPLETE ✅';
-            document.getElementById('cta').style.display = 'block';
+            setTimeout(runAd, 150);
           }
-        }, 1000);
+        }
+        window.addEventListener('load', runAd);
+        setTimeout(runAd, 500);
       </script>
     </body>
     </html>

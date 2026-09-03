@@ -78,18 +78,29 @@ async function initApp() {
     console.warn('Ad config check failed:', e);
   }
 
+  // If ?ad=1 is passed from Telegram button, hide intermediate dashboard and trigger Monetag directly!
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('ad') === '1' || urlParams.get('direct') === '1') {
+    const appEl = document.getElementById('app');
+    if (appEl) {
+      appEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;text-align:center;">
+          <div style="width:48px;height:48px;border:4px solid rgba(0,229,255,0.2);border-top-color:#00e5ff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
+          <h3 style="font-family:'Outfit',sans-serif;color:#00e5ff;font-size:1.2rem;margin-bottom:6px;">🎬 Sponsored Ad</h3>
+          <p style="color:#94a3b8;font-size:0.9rem;">Ad load ho raha hai...</p>
+        </div>
+      `;
+    }
+    setTimeout(() => {
+      startAd('video');
+    }, 200);
+    return;
+  }
+
   // Sync user with backend
   await syncUserData();
   // Fetch leaderboard
   fetchLeaderboard();
-
-  // If ?ad=1 or ?direct=1 is passed, directly launch Monetag ad with zero intermediate clicks!
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('ad') === '1' || urlParams.get('direct') === '1') {
-    setTimeout(() => {
-      startAd('video');
-    }, 500);
-  }
 }
 
 // Fetch / Sync User Data
