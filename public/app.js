@@ -204,9 +204,24 @@ async function startAd(adType) {
       return;
     }
 
-    currentAdSession = data.token;
+    // 1. If Monetag Rewarded SDK is loaded, trigger real Monetag ad!
+    if (typeof window.show_11718056 === 'function') {
+      showToast('🎬 Loading Monetag sponsored ad...');
+      try {
+        window.show_11718056().then(async () => {
+          // User completed the Monetag ad!
+          await claimAdReward();
+        }).catch((err) => {
+          console.warn('Monetag ad closed or skipped:', err);
+          showToast('⚠️ Ad was closed early or could not be loaded.');
+        });
+        return;
+      } catch (err) {
+        console.warn('Monetag call error, falling back:', err);
+      }
+    }
 
-    // If real AdsGram ad network is configured, trigger real rewarded video ad
+    // 2. If AdsGram ad network is configured, trigger AdsGram rewarded video ad
     if (adsgramController && (adType === 'video' || adType === 'sponsor')) {
       showToast('🎬 Loading sponsored video ad...');
       adsgramController.show().then(async (result) => {
@@ -219,7 +234,7 @@ async function startAd(adType) {
       return;
     }
 
-    // Default: Open Interactive Ad Player modal
+    // 3. Fallback: Open Interactive Ad Player modal
     openAdModal(adType);
   } catch (err) {
     showToast('Failed to load ad. Please try again.');

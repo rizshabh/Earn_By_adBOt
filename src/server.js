@@ -64,7 +64,7 @@ app.get('/ad/go/:token', async (req, res) => {
     return res.redirect(directUrl);
   }
 
-  // If no external direct link is set, serve a dedicated full-screen video ad landing page
+  // If no external direct link is set, serve a dedicated Monetag sponsored ad landing page
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -72,25 +72,35 @@ app.get('/ad/go/:token', async (req, res) => {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>Sponsored Ad</title>
+      <!-- Monetag Rewarded Ad SDK (Zone 11718056) -->
+      <script src="//libtl.com/sdk.js" data-zone="11718056" data-sdk="show_11718056"></script>
       <style>
         body { margin: 0; background: #0a0e17; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; }
-        .box { background: #162035; border: 1px solid #00e5ff; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; }
+        .box { background: #162035; border: 1px solid #00e5ff; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(0,229,255,0.15); }
         h2 { margin-top: 0; color: #00e5ff; }
-        .timer { font-size: 2rem; font-weight: bold; color: #ffd600; margin: 16px 0; }
-        .btn { display: inline-block; background: #00e676; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+        .timer { font-size: 2.2rem; font-weight: bold; color: #ffd600; margin: 16px 0; }
+        .btn { display: inline-block; background: #00e676; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 16px; font-size: 1.1rem; }
       </style>
     </head>
     <body>
       <div class="box">
         <h2>🎬 Sponsored Video Ad</h2>
-        <p>Aapka ad chal raha hai. Kripya countdown pura hone ka intezar karein.</p>
+        <p>Aapka Monetag ad load ho raha hai. Countdown pura hone par reward claim karein.</p>
         <div class="timer" id="timer">5s</div>
         <div id="cta" style="display: none;">
-          <p style="color: #00e676; font-weight: bold;">✅ Ad complete! Telegram par jakar "Claim Reward" dabayein.</p>
-          <a href="https://t.me/Earn_By_adBOt" class="btn">Telegram Me Wapas Jayein</a>
+          <p style="color: #00e676; font-weight: bold; font-size: 1.1rem;">✅ Ad Complete!</p>
+          <p style="color: #94a3b8; font-size: 0.9rem;">Telegram par jakar <strong>Claim Reward</strong> dabayein.</p>
+          <a href="https://t.me/Earn_By_adBOt" class="btn">Telegram Me Wapas Jayein ➔</a>
         </div>
       </div>
       <script>
+        // Auto-trigger Monetag Ad
+        window.addEventListener('load', () => {
+          if (typeof show_11718056 === 'function') {
+            show_11718056().catch(e => console.log('Monetag ad notice:', e));
+          }
+        });
+
         let count = 5;
         const t = setInterval(() => {
           count--;
