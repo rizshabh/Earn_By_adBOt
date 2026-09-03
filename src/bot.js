@@ -82,40 +82,70 @@ Ads dekh kar direct *UPI & Paytm* me paise kamao!
   }
 });
 
-// Action: Watch Quick Ad (DhanTube Style)
+// Action: Watch Quick Ad (DhanTube Style with real clickable link)
 bot.action('watch_ad', async (ctx) => {
   try {
-    await ctx.answerCbQuery('🎬 Ad load ho raha hai...');
+    await ctx.answerCbQuery('🎬 Ad link taiyar ho raha hai...');
     const telegramId = String(ctx.from.id);
 
     const { token, estimatedReward } = await db.startAdSession(telegramId);
+    const adUrl = `${WEBAPP_URL || 'http://localhost:3000'}/ad/go/${token}`;
 
-    // DhanTube exact notice format
-    await ctx.replyWithMarkdown(
+    // DhanTube exact notice format with clickable ad button
+    const adMsg = 
 `📊 *Ek ad dekhne ki current rate: ₹ 3-5*
 
-⚠️ *Video khatam hone se pehle band mat karna warna reward nahi milega*`
-    );
+⚠️ *Video khatam hone se pehle band mat karna warna reward nahi milega*
 
-    setTimeout(async () => {
-      // Complete ad
-      const res = await db.completeAdSession(telegramId, token);
-      if (res.success) {
-        // DhanTube exact reward popup format: "+₹ 3.87"
-        await ctx.replyWithMarkdown(
+👇 *Neeche diye gaye button par click karke Ad dekhein:*`;
+
+    const adButtons = Markup.inlineKeyboard([
+      [
+        Markup.button.url(`🎬 Ad Dekho / Open Link (₹ ${estimatedReward.toFixed(2)})`, adUrl)
+      ],
+      [
+        Markup.button.callback(`✅ Claim Reward (+₹ ${estimatedReward.toFixed(2)})`, `claim_${token}`)
+      ],
+      [
+        Markup.button.callback('⬅️ Main Menu', 'back_home')
+      ]
+    ]);
+
+    await ctx.replyWithMarkdown(adMsg, adButtons);
+  } catch (err) {
+    console.error('Error in watch_ad:', err);
+    ctx.reply('Failed to load ad. Please try again.');
+  }
+});
+
+// Action: Dynamic Claim Reward for token
+bot.action(/^claim_(.+)$/, async (ctx) => {
+  try {
+    const token = ctx.match[1];
+    const telegramId = String(ctx.from.id);
+
+    const res = await db.completeAdSession(telegramId, token);
+    if (res.success) {
+      await ctx.answerCbQuery('🎉 Reward credited!');
+      // DhanTube exact reward popup format: "+₹ 3.87"
+      await ctx.replyWithMarkdown(
 `*+₹ ${Number(res.reward).toFixed(2)}*
 
 💰 *Total Balance:* \`₹ ${Number(res.newBalance).toFixed(2)}\``,
-          getMainKeyboard(telegramId)
-        );
-      } else {
-        ctx.reply('⚠️ ' + (res.error || 'Ad verification failed.'));
-      }
-    }, 5000);
-
+        getMainKeyboard(telegramId)
+      );
+    } else {
+      await ctx.answerCbQuery('⚠️ ' + res.error, { show_alert: true });
+      await ctx.replyWithMarkdown(
+`⚠️ *Notice:* ${res.error}\n\n_Kripya link par click karke pura ad dekhein._`,
+        Markup.inlineKeyboard([
+          [Markup.button.url('🎬 Ad Dubara Kholein', `${WEBAPP_URL || 'http://localhost:3000'}/ad/go/${token}`)],
+          [Markup.button.callback('✅ Claim Karein', `claim_${token}`)]
+        ])
+      );
+    }
   } catch (err) {
-    console.error('Error in watch_ad:', err);
-    ctx.reply('Failed to watch ad. Please try opening the Mini App.');
+    console.error('Error in claim reward:', err);
   }
 });
 
