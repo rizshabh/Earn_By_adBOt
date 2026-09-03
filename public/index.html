@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Earn By AdBot - Mini App</title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Real Ad Network: AdsGram Rewarded Video SDK for Telegram Mini Apps -->
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Top Bar / User Header -->
+    <header class="header">
+      <div class="user-profile">
+        <div class="avatar-ring">
+          <div class="avatar" id="userAvatar">👤</div>
+        </div>
+        <div class="user-meta">
+          <span class="greeting">Welcome back,</span>
+          <h2 class="username" id="userName">User</h2>
+        </div>
+      </div>
+      <div class="badge-streak" id="streakBadge" title="Daily Streak">
+        🔥 <span id="streakCount">0</span>d
+      </div>
+    </header>
+
+    <!-- Balance Hero Card -->
+    <section class="balance-card">
+      <div class="balance-sub">Current Balance</div>
+      <div class="balance-main">
+        <span class="coin-icon">💎</span>
+        <span class="balance-value" id="userBalance">0.00</span>
+        <span class="currency-tag">COINS</span>
+      </div>
+      <div class="balance-fiat">
+        ≈ $<span id="fiatValue">0.00</span> USD &bull; <span id="tonValue">0.00</span> TON
+      </div>
+      <div class="balance-stats-row">
+        <div class="mini-stat">
+          <span class="stat-label">Watched Today</span>
+          <strong id="adsToday">0</strong>
+        </div>
+        <div class="mini-stat-divider"></div>
+        <div class="mini-stat">
+          <span class="stat-label">Total Earned</span>
+          <strong id="totalEarned">0.00</strong>
+        </div>
+        <div class="mini-stat-divider"></div>
+        <div class="mini-stat">
+          <span class="stat-label">Referrals</span>
+          <strong id="refCount">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Tab Navigation Contents -->
+    <main class="content-area">
+      <!-- TAB 1: EARN / WATCH ADS -->
+      <section id="tab-earn" class="tab-pane active">
+        <div class="section-title">
+          <h3>⚡ Watch Ads & Earn</h3>
+          <span class="tag-live">Instant Rewards</span>
+        </div>
+
+        <div class="ad-cards-grid">
+          <!-- Rewarded Video Ad -->
+          <div class="earn-card primary-card" onclick="startAd('video')">
+            <div class="card-glow"></div>
+            <div class="earn-card-icon">🎬</div>
+            <div class="earn-card-info">
+              <h4>Rewarded Video Ad</h4>
+              <p>Watch full 15s video ad</p>
+              <div class="card-reward">+25 Coins ($0.025)</div>
+            </div>
+            <button class="btn btn-action">Watch</button>
+          </div>
+
+          <!-- Sponsor Interstitial Ad -->
+          <div class="earn-card" onclick="startAd('sponsor')">
+            <div class="earn-card-icon">🌟</div>
+            <div class="earn-card-info">
+              <h4>Sponsor Showcase</h4>
+              <p>Interactive partner promotional ad</p>
+              <div class="card-reward">+30 Coins ($0.030)</div>
+            </div>
+            <button class="btn btn-secondary">View</button>
+          </div>
+
+          <!-- Fast Banner Ad -->
+          <div class="earn-card" onclick="startAd('fast')">
+            <div class="earn-card-icon">⚡</div>
+            <div class="earn-card-info">
+              <h4>Quick Ad View</h4>
+              <p>Short 5-second sponsor spotlight</p>
+              <div class="card-reward">+15 Coins ($0.015)</div>
+            </div>
+            <button class="btn btn-secondary">Start</button>
+          </div>
+        </div>
+
+        <!-- Ad Network Integration Box -->
+        <div class="ad-network-card">
+          <div class="network-badge">Ad Monetization Ready</div>
+          <p>Easily plug in Monetag, Adsterra, Google AdSense, or Telegram Ads via backend webhook configs.</p>
+        </div>
+      </section>
+
+      <!-- TAB 2: WALLET -->
+      <section id="tab-wallet" class="tab-pane">
+        <div class="section-title">
+          <h3>💳 Payout & Wallet</h3>
+          <span class="tag-status">Auto-Processing</span>
+        </div>
+
+        <div class="withdraw-form-card">
+          <h4>Request Withdrawal</h4>
+          <p class="form-desc">Minimum withdrawal is <strong>500 Coins ($0.50)</strong>.</p>
+
+          <div class="form-group">
+            <label>Payment Method</label>
+            <div class="method-selector">
+              <button type="button" class="method-btn active" data-method="TON Wallet" onclick="selectMethod(this)">💎 TON</button>
+              <button type="button" class="method-btn" data-method="USDT (TRC20)" onclick="selectMethod(this)">💵 USDT</button>
+              <button type="button" class="method-btn" data-method="UPI / Paytm" onclick="selectMethod(this)">🇮🇳 UPI</button>
+              <button type="button" class="method-btn" data-method="Crypto (BTC/LTC)" onclick="selectMethod(this)">⚡ Crypto</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label id="addressLabel">Destination Address / ID</label>
+            <input type="text" id="withdrawAddress" placeholder="e.g. UQ... or UPI ID or Wallet" class="input-field">
+          </div>
+
+          <div class="form-group">
+            <label>Amount (Coins)</label>
+            <div class="input-with-action">
+              <input type="number" id="withdrawAmount" placeholder="Min 500" min="500" class="input-field">
+              <button class="btn-text-action" onclick="setMaxWithdraw()">MAX</button>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block" id="btnSubmitWithdraw" onclick="submitWithdrawal()">Request Payout</button>
+        </div>
+
+        <div class="history-card">
+          <h4>Withdrawal History</h4>
+          <div id="txHistoryList" class="tx-list">
+            <div class="empty-state">No withdrawal requests yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: DAILY REWARDS -->
+      <section id="tab-rewards" class="tab-pane">
+        <div class="section-title">
+          <h3>🎁 Daily Bonus & Streaks</h3>
+          <span class="tag-live">Daily Free Coins</span>
+        </div>
+
+        <div class="daily-streak-container">
+          <p class="streak-intro">Log in every day to claim bonus rewards. Streaks multiply your bonuses!</p>
+          <div class="streak-grid" id="streakGrid">
+            <!-- Day 1-7 tiles rendered dynamically -->
+          </div>
+
+          <button class="btn btn-primary btn-block" id="btnClaimDaily" onclick="claimDailyBonus()">
+            🎁 Claim Today's Bonus
+          </button>
+        </div>
+
+        <div class="mystery-box-card">
+          <div class="mystery-icon">🎰</div>
+          <div class="mystery-info">
+            <h4>Lucky Spin & Tasks</h4>
+            <p>Complete extra sponsor tasks to earn up to 500 bonus coins!</p>
+          </div>
+          <button class="btn btn-secondary" onclick="showToast('⭐ Stay tuned! Bonus wheel unlocking next.')">Play</button>
+        </div>
+      </section>
+
+      <!-- TAB 4: REFERRAL -->
+      <section id="tab-referrals" class="tab-pane">
+        <div class="section-title">
+          <h3>👥 Invite Friends</h3>
+          <span class="tag-status">10% Lifetime Bonus</span>
+        </div>
+
+        <div class="referral-hero">
+          <div class="ref-illu">🚀</div>
+          <h4>Invite Friends & Earn Together</h4>
+          <p>Get <strong>+10 Coins</strong> for each friend who joins, plus <strong>10% lifetime commission</strong> on all ads they watch!</p>
+        </div>
+
+        <div class="ref-link-box">
+          <label>Your Referral Link</label>
+          <div class="link-input-wrap">
+            <input type="text" id="refLinkInput" readonly value="https://t.me/EarnByAdBot?start=ref_..." class="input-field">
+            <button class="btn btn-secondary" onclick="copyReferralLink()">📋 Copy</button>
+          </div>
+          <button class="btn btn-primary btn-block mt-2" onclick="shareReferral()">
+            ✈️ Share on Telegram
+          </button>
+        </div>
+
+        <div class="ref-stats-grid">
+          <div class="ref-stat-box">
+            <span class="ref-stat-num" id="refTotalInvited">0</span>
+            <span class="ref-stat-text">Friends Invited</span>
+          </div>
+          <div class="ref-stat-box">
+            <span class="ref-stat-num" id="refTotalEarned">0</span>
+            <span class="ref-stat-text">Commission (Coins)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: LEADERBOARD -->
+      <section id="tab-leaderboard" class="tab-pane">
+        <div class="section-title">
+          <h3>🏆 Top Earners</h3>
+          <span class="tag-live">Global</span>
+        </div>
+
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="loading-spinner">Loading top earners...</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Ad Watch Modal -->
+    <div id="adModal" class="modal-overlay hidden">
+      <div class="ad-modal-card">
+        <div class="ad-header">
+          <span class="ad-badge">SPONSORED AD</span>
+          <span class="ad-timer" id="adTimer">10s</span>
+        </div>
+
+        <!-- Ad Creative Container -->
+        <div class="ad-creative-container" id="adCreative">
+          <div class="ad-video-mock">
+            <div class="mock-play-icon">▶</div>
+            <div class="ad-brand-info">
+              <h3 id="adTitle">Telegram Web3 Ecosystem</h3>
+              <p id="adSubtitle">Discover next-generation decentralized apps & rewards.</p>
+            </div>
+            <div class="ad-cta-banner">
+              <span>Sponsored Advertiser</span>
+              <a href="#" class="ad-link-btn" onclick="return false;">Learn More</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="adProgressBar"></div>
+        </div>
+
+        <div class="ad-footer">
+          <p class="ad-instruction" id="adInstruction">Please wait until the countdown finishes...</p>
+          <button class="btn btn-success btn-block hidden" id="btnClaimAdReward" onclick="claimAdReward()">
+            🎉 Claim +25 Coins Reward
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('earn', this)">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">Earn</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('wallet', this)">
+        <span class="nav-icon">💳</span>
+        <span class="nav-label">Wallet</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('rewards', this)">
+        <span class="nav-icon">🎁</span>
+        <span class="nav-label">Bonus</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('referrals', this)">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Friends</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('leaderboard', this)">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Top</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

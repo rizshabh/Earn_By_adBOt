@@ -1,0 +1,28 @@
+{
+  "users": {
+    "6732721574": {
+      "telegram_id": "6732721574",
+      "username": "Rishabhchaur",
+      "first_name": "Morphhhh",
+      "balance": 25,
+      "total_earned": 25,
+      "ads_watched_today": 1,
+      "total_ads_watched": 1,
+      "last_ad_watched_at": "2026-09-03T15:04:03.065Z",
+      "daily_streak": 0,
+      "last_daily_reward_at": null,
+      "referred_by": null,
+      "total_referrals": 0,
+      "created_at": "2026-09-03T15:01:25.495Z"
+    }
+  },
+  "adViews": [
+    {
+      "telegram_id": "6732721574",
+      "reward": 25,
+      "watched_at": "2026-09-03T15:04:03.065Z"
+    }
+  ],
+  "withdrawals": [],
+  "adSessions": {}
+}

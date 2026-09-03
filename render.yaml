@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: earn-by-adbot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: ADSGRAM_BLOCK_ID
+        sync: false
+      - key: MONETAG_TAG_ID
+        sync: false

@@ -1,0 +1,29 @@
+{
+  "name": "earn_by_adbot",
+  "version": "1.0.0",
+  "description": "Telegram Ad Earning Bot and Mini App with rewards, wallet, daily streak, and referrals",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "node src/server.js",
+    "bot": "node src/bot.js",
+    "dev": "node index.js"
+  },
+  "keywords": [
+    "telegram-bot",
+    "telegram-mini-app",
+    "telegraf",
+    "ad-rewards",
+    "ton-wallet"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0",
+    "telegraf": "^4.16.3"
+  }
+}
