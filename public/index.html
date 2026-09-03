@@ -40,7 +40,7 @@
         <span class="currency-tag">COINS</span>
       </div>
       <div class="balance-fiat">
-        ≈ $<span id="fiatValue">0.00</span> USD &bull; <span id="tonValue">0.00</span> TON
+        ≈ <strong class="inr-highlight">₹<span id="fiatValue">0.00</span> INR</strong>
       </div>
       <div class="balance-stats-row">
         <div class="mini-stat">
@@ -50,7 +50,7 @@
         <div class="mini-stat-divider"></div>
         <div class="mini-stat">
           <span class="stat-label">Total Earned</span>
-          <strong id="totalEarned">0.00</strong>
+          <strong>₹<span id="totalEarnedInr">0.00</span></strong>
         </div>
         <div class="mini-stat-divider"></div>
         <div class="mini-stat">
@@ -69,7 +69,7 @@
       <section id="tab-earn" class="tab-pane active">
         <div class="section-title">
           <h3>⚡ Watch Ads & Earn</h3>
-          <span class="tag-live">Instant Rewards</span>
+          <span class="tag-live">Instant Payout</span>
         </div>
 
         <div class="ad-cards-grid">
@@ -79,8 +79,8 @@
             <div class="earn-card-icon">🎬</div>
             <div class="earn-card-info">
               <h4>Rewarded Video Ad</h4>
-              <p>Watch full 15s video ad</p>
-              <div class="card-reward">+25 Coins ($0.025)</div>
+              <p>Watch full 15s sponsored video</p>
+              <div class="card-reward">+25 Coins (₹2.50)</div>
             </div>
             <button class="btn btn-action">Watch</button>
           </div>
@@ -91,7 +91,7 @@
             <div class="earn-card-info">
               <h4>Sponsor Showcase</h4>
               <p>Interactive partner promotional ad</p>
-              <div class="card-reward">+30 Coins ($0.030)</div>
+              <div class="card-reward">+30 Coins (₹3.00)</div>
             </div>
             <button class="btn btn-secondary">View</button>
           </div>
@@ -102,7 +102,7 @@
             <div class="earn-card-info">
               <h4>Quick Ad View</h4>
               <p>Short 5-second sponsor spotlight</p>
-              <div class="card-reward">+15 Coins ($0.015)</div>
+              <div class="card-reward">+15 Coins (₹1.50)</div>
             </div>
             <button class="btn btn-secondary">Start</button>
           </div>
@@ -111,7 +111,7 @@
         <!-- Ad Network Integration Box -->
         <div class="ad-network-card">
           <div class="network-badge">Ad Monetization Ready</div>
-          <p>Easily plug in Monetag, Adsterra, Google AdSense, or Telegram Ads via backend webhook configs.</p>
+          <p>Instant UPI & Paytm withdrawals with real ad earnings.</p>
         </div>
       </section>
 
@@ -119,25 +119,25 @@
       <section id="tab-wallet" class="tab-pane">
         <div class="section-title">
           <h3>💳 Payout & Wallet</h3>
-          <span class="tag-status">Auto-Processing</span>
+          <span class="tag-status">Instant Transfer</span>
         </div>
 
         <div class="withdraw-form-card">
-          <h4>Request Withdrawal</h4>
-          <p class="form-desc">Minimum withdrawal is <strong>500 Coins ($0.50)</strong>.</p>
+          <h4>Request Withdrawal (₹ INR)</h4>
+          <p class="form-desc">Minimum withdrawal is <strong>500 Coins (₹50.00)</strong>.</p>
 
           <div class="form-group">
             <label>Payment Method</label>
             <div class="method-selector">
-              <button type="button" class="method-btn active" data-method="TON Wallet" onclick="selectMethod(this)">💎 TON</button>
-              <button type="button" class="method-btn" data-method="USDT (TRC20)" onclick="selectMethod(this)">💵 USDT</button>
-              <button type="button" class="method-btn" data-method="UPI / Paytm" onclick="selectMethod(this)">🇮🇳 UPI</button>
-              <button type="button" class="method-btn" data-method="Crypto (BTC/LTC)" onclick="selectMethod(this)">⚡ Crypto</button>
+              <button type="button" class="method-btn active" data-method="UPI (GPay/PhonePe)" onclick="selectMethod(this)">🇮🇳 UPI</button>
+              <button type="button" class="method-btn" data-method="Paytm Wallet" onclick="selectMethod(this)">📱 Paytm</button>
+              <button type="button" class="method-btn" data-method="Bank Transfer (IMPS)" onclick="selectMethod(this)">🏦 Bank</button>
+              <button type="button" class="method-btn" data-method="Crypto (USDT/TON)" onclick="selectMethod(this)">💎 Crypto</button>
             </div>
           </div>
 
           <div class="form-group">
-            <label id="addressLabel">Destination Address / ID</label>
+            <label id="addressLabel">UPI ID (e.g. mobile@upi / username@okhdfcbank)</label>
             <input type="text" id="withdrawAddress" placeholder="e.g. UQ... or UPI ID or Wallet" class="input-field">
           </div>
 

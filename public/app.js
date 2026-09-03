@@ -121,14 +121,17 @@ function updateUI() {
   const balance = Number(currentUser.balance || 0);
   document.getElementById('userBalance').textContent = balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   
-  // Conversion estimates: 1000 Coins = $1.00 USD, 1 TON = ~$3.00 (3000 Coins)
-  const fiatVal = (balance / 1000).toFixed(2);
-  const tonVal = (balance / 3000).toFixed(3);
-  document.getElementById('fiatValue').textContent = fiatVal;
-  document.getElementById('tonValue').textContent = tonVal;
+  // INR Conversion: 10 Coins = ₹1.00 INR (100 Coins = ₹10.00, 500 Coins = ₹50.00)
+  const inrVal = (balance / 10).toFixed(2);
+  const totalEarnedInr = (Number(currentUser.total_earned || 0) / 10).toFixed(2);
+
+  const fiatEl = document.getElementById('fiatValue');
+  if (fiatEl) fiatEl.textContent = inrVal;
+
+  const earnedInrEl = document.getElementById('totalEarnedInr');
+  if (earnedInrEl) earnedInrEl.textContent = totalEarnedInr;
 
   document.getElementById('adsToday').textContent = currentUser.ads_watched_today || 0;
-  document.getElementById('totalEarned').textContent = Number(currentUser.total_earned || 0).toFixed(2);
   document.getElementById('refCount').textContent = currentUser.total_referrals || 0;
   document.getElementById('streakCount').textContent = currentUser.daily_streak || 0;
 
@@ -338,14 +341,20 @@ function selectMethod(btn) {
   selectedPaymentMethod = btn.getAttribute('data-method');
 
   const addrLabel = document.getElementById('addressLabel');
-  if (selectedPaymentMethod.includes('TON')) {
-    addrLabel.textContent = 'TON Wallet Address (UQ... / EQ...)';
-  } else if (selectedPaymentMethod.includes('USDT')) {
-    addrLabel.textContent = 'USDT (TRC20) Wallet Address (T...)';
-  } else if (selectedPaymentMethod.includes('UPI')) {
-    addrLabel.textContent = 'UPI ID (e.g. yourname@okaxis / paytm)';
+  const inputEl = document.getElementById('withdrawAddress');
+
+  if (selectedPaymentMethod.includes('UPI')) {
+    addrLabel.textContent = 'UPI ID (e.g. mobile@upi / username@okhdfcbank)';
+    inputEl.placeholder = 'e.g. 9876543210@paytm or name@okaxis';
+  } else if (selectedPaymentMethod.includes('Paytm')) {
+    addrLabel.textContent = 'Paytm Registered Mobile Number (10 digits)';
+    inputEl.placeholder = 'e.g. 9876543210';
+  } else if (selectedPaymentMethod.includes('Bank')) {
+    addrLabel.textContent = 'Bank Account Number + IFSC Code';
+    inputEl.placeholder = 'e.g. 123456789012, SBIN0001234';
   } else {
-    addrLabel.textContent = 'Crypto Wallet Address';
+    addrLabel.textContent = 'Crypto (USDT TRC20 or TON Wallet Address)';
+    inputEl.placeholder = 'e.g. T... or UQ...';
   }
 }
 
@@ -360,12 +369,12 @@ async function submitWithdrawal() {
   const amount = Number(document.getElementById('withdrawAmount').value);
 
   if (!address) {
-    showToast('Please enter your payment address / ID.');
+    showToast('Please enter your payment address / UPI ID.');
     return;
   }
 
   if (isNaN(amount) || amount < 500) {
-    showToast('Minimum withdrawal is 500 Coins ($0.50).');
+    showToast('Minimum withdrawal is 500 Coins (₹50.00).');
     return;
   }
 

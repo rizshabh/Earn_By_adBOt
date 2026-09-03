@@ -60,13 +60,16 @@ bot.start(async (ctx) => {
       referred_by: referredBy
     });
 
+    const balance = Number(user.balance || 0);
+    const inrValue = (balance / 10).toFixed(2);
+
     const welcomeMsg = 
 `👋 *Welcome to Earn_By_adBOt, ${ctx.from.first_name || 'Friend'}!* 💎
 
-Earn real cash & crypto rewards by watching short ads, checking in daily, and inviting friends.
+Earn real cash & rewards by watching short ads, checking in daily, and inviting friends.
 
 📊 *Your Account:*
-• 💎 *Balance:* \`${Number(user.balance || 0).toFixed(2)} Coins\` (≈ $${(Number(user.balance || 0)/1000).toFixed(2)})
+• 💎 *Balance:* \`${balance.toFixed(2)} Coins\` (≈ *₹${inrValue} INR*)
 • 🎬 *Ads Watched:* \`${user.total_ads_watched || 0}\`
 • 🔥 *Daily Streak:* \`${user.daily_streak || 0} days\`
 • 👥 *Referrals:* \`${user.total_referrals || 0}\`
@@ -91,8 +94,8 @@ bot.action('watch_ad', async (ctx) => {
     const adMsg = await ctx.replyWithMarkdown(
 `📺 *Sponsored Ad Spotlight:*
 ━━━━━━━━━━━━━━━━━━━
-⚡ *Sponsor:* Web3 Crypto Staking & DEX
-💡 *Explore top yield farming & Telegram apps.*
+⚡ *Sponsor:* Featured App & Sponsor Spotlight
+💡 *Watch and earn instant coins & INR.*
 
 ⏳ _Simulating ad view (5 seconds)..._`
     );
@@ -101,10 +104,12 @@ bot.action('watch_ad', async (ctx) => {
       // Complete ad
       const res = await db.completeAdSession(telegramId, token);
       if (res.success) {
+        const rewardInr = (res.reward / 10).toFixed(2);
+        const newInr = (res.newBalance / 10).toFixed(2);
         await ctx.replyWithMarkdown(
 `🎉 *Ad Completed!*
-You received *+${res.reward} Coins*! 💎
-Current Balance: \`${res.newBalance.toFixed(2)} Coins\``,
+You received *+${res.reward} Coins (₹${rewardInr})*! 💎
+Current Balance: \`${res.newBalance.toFixed(2)} Coins\` (*₹${newInr} INR*)`,
           getMainKeyboard(telegramId)
         );
       } else {
@@ -125,23 +130,25 @@ bot.action('wallet', async (ctx) => {
     const telegramId = String(ctx.from.id);
     const user = await db.getOrCreateUser(telegramId, { first_name: ctx.from.first_name });
     const balance = Number(user.balance || 0);
+    const inrValue = (balance / 10).toFixed(2);
+    const totalInr = (Number(user.total_earned || 0) / 10).toFixed(2);
 
     const walletMsg = 
-`💳 *Your Wallet Overview:*
+`💳 *Your Wallet Overview (₹ INR):*
 ━━━━━━━━━━━━━━━━━━━
 💎 *Available Balance:* \`${balance.toFixed(2)} Coins\`
-💵 *USD Equivalent:* \`$${(balance / 1000).toFixed(2)} USD\`
-⚡ *TON Equivalent:* \`${(balance / 3000).toFixed(3)} TON\`
+🇮🇳 *INR Value:* \`₹${inrValue} INR\`
+⚡ *TON Value:* \`${(balance / 3000).toFixed(3)} TON\`
 
 📈 *Earnings Stats:*
-• Total Earned: \`${Number(user.total_earned || 0).toFixed(2)} Coins\`
+• Total Earned: \`${Number(user.total_earned || 0).toFixed(2)} Coins\` (\`₹${totalInr} INR\`)
 • Ads Watched: \`${user.total_ads_watched || 0}\`
 
 📌 *Withdrawal Rules:*
-• Minimum Payout: *500 Coins ($0.50)*
-• Supported Methods: *TON Wallet, USDT (TRC20), UPI, Crypto*
+• Minimum Payout: *500 Coins (₹50.00)*
+• Supported Methods: *UPI (GPay / PhonePe / Paytm), Bank Transfer (IMPS), Crypto*
 
-👉 Open the Mini App to submit instant withdrawal requests!`;
+👉 Open the Mini App to submit instant UPI withdrawal requests!`;
 
     const isHttps = WEBAPP_URL && WEBAPP_URL.startsWith('https://');
     const appBtn = isHttps
@@ -226,7 +233,7 @@ bot.action('referral', async (ctx) => {
 Share your referral link with friends and channels to earn passive income!
 
 🎁 *Rewards:*
-• *+10 Coins* instant bonus per joined friend
+• *+10 Coins (₹1.00)* instant bonus per joined friend
 • *10% lifetime commission* on all ads your friends watch!
 
 🔗 *Your Unique Referral Link:*
@@ -234,9 +241,9 @@ Share your referral link with friends and channels to earn passive income!
 
 📊 *Your Referral Stats:*
 • Invited Friends: \`${user.total_referrals || 0}\`
-• Total Referral Income: \`${(user.total_referrals * 10).toFixed(0)} Coins\``;
+• Total Referral Income: \`${(user.total_referrals * 10).toFixed(0)} Coins\` (\`₹${(user.total_referrals).toFixed(2)} INR\`)`;
 
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent('🚀 Earn free cash & TON crypto by watching ads on Telegram!')}`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent('🚀 Earn real money (₹ INR) & crypto by watching short ads on Telegram!')}`;
 
     await ctx.replyWithMarkdown(refMsg, Markup.inlineKeyboard([
       [Markup.button.url('✈️ Share on Telegram', shareUrl)],
@@ -261,7 +268,8 @@ bot.action('leaderboard', async (ctx) => {
       boardText += `_No ranked players yet. Be the first to earn!_`;
     } else {
       leaderboard.forEach((u, i) => {
-        boardText += `${medals[i] || '#' + (i+1)} *${u.name}* — \`${Number(u.total_earned).toFixed(2)} Coins\` (${u.total_ads} ads)\n`;
+        const inr = (Number(u.total_earned) / 10).toFixed(2);
+        boardText += `${medals[i] || '#' + (i+1)} *${u.name}* — \`${Number(u.total_earned).toFixed(2)} Coins\` (*₹${inr}*) (${u.total_ads} ads)\n`;
       });
     }
 
@@ -280,19 +288,19 @@ bot.action('help', async (ctx) => {
     const telegramId = String(ctx.from.id);
 
     const helpMsg = 
-`ℹ️ *Earn_By_adBOt FAQ & Guide:*
+`ℹ️ *Earn_By_adBOt FAQ & Guide (₹ INR):*
 ━━━━━━━━━━━━━━━━━━━
 ❓ *How do I earn money?*
-• Watch short sponsored video ads (10-15s).
+• Watch short video & sponsor ads (₹1.50 - ₹3.00 per ad).
 • Claim daily streak login rewards every 24h.
 • Invite friends with your referral link (10% commission).
 
 ❓ *How do withdrawals work?*
-• Once you reach *500 Coins ($0.50)*, open the Mini App wallet to request payout in TON, USDT, or UPI.
+• Once you reach *500 Coins (₹50.00)*, open the Mini App wallet to request instant payout to your UPI ID (Google Pay, PhonePe, Paytm) or Bank account.
 • Payouts are processed within 24 hours.
 
 ❓ *Is it safe & legit?*
-• Advertisers pay to show ads in the bot/Mini App, and we share revenue directly with you!`;
+• Advertisers pay to sponsor campaigns, and we share the ad revenue directly with you!`;
 
     await ctx.replyWithMarkdown(helpMsg, Markup.inlineKeyboard([
       [Markup.button.callback('⬅️ Back to Menu', 'back_home')]
