@@ -303,8 +303,19 @@ const db = {
       return { success: false, error: 'Kripya sahi withdrawal amount dalein' };
     }
 
-    // Minimum withdrawal threshold: ₹50.00
-    const MIN_WITHDRAW = 50.0;
+    // Promotional Withdrawal Threshold: ₹200.00 and minimum 3 referrals
+    const MIN_WITHDRAW = 200.0;
+    const REQUIRED_REFS = 3;
+    const currentRefs = user.total_referrals || 0;
+
+    if (currentRefs < REQUIRED_REFS) {
+      const remaining = REQUIRED_REFS - currentRefs;
+      return { 
+        success: false, 
+        error: `Withdrawal unlock karne ke liye kam se kam ${REQUIRED_REFS} dosto ko invite karein! (Aapke referrals: ${currentRefs}/${REQUIRED_REFS}, bache: ${remaining})` 
+      };
+    }
+
     if (numAmount < MIN_WITHDRAW) {
       return { success: false, error: `Minimum withdrawal ₹${MIN_WITHDRAW.toFixed(2)} hai.` };
     }

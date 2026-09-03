@@ -157,6 +157,8 @@ bot.action('wallet', async (ctx) => {
     const user = await db.getOrCreateUser(telegramId, { first_name: ctx.from.first_name });
     const balance = Number(user.balance || 0).toFixed(2);
     const totalEarned = Number(user.total_earned || 0).toFixed(2);
+    const refs = user.total_referrals || 0;
+    const refStatus = refs >= 3 ? '✅ Unlocked (3/3)' : `🔒 Locked (${refs}/3 Referrals)`;
 
     const walletMsg = 
 `💳 *Aapka Wallet Overview:*
@@ -164,9 +166,11 @@ bot.action('wallet', async (ctx) => {
 💰 *Available Balance:* \`₹ ${balance}\`
 📈 *Total Earning:* \`₹ ${totalEarned}\`
 🎬 *Ads Watched:* \`${user.total_ads_watched || 0}\`
+👥 *Referrals:* \`${refs}\` (${refStatus})
 
-📌 *Withdrawal Rules:*
-• Minimum Payout: *₹ 50.00*
+📌 *Withdrawal Unlock Rules:*
+• Minimum Payout: *₹ 200.00*
+• Required Referrals: *3 Active Friends*
 • Payout Methods: *UPI (GPay / PhonePe / Paytm), Bank Transfer (IMPS)*
 
 👉 *Neeche button dabakar withdrawal request lagayein:*`;
@@ -309,19 +313,20 @@ bot.action('help', async (ctx) => {
     const telegramId = String(ctx.from.id);
 
     const helpMsg = 
-`ℹ️ *Earn_By_adBOt FAQ & Guide (₹ INR):*
+`ℹ️ *EarnZone FAQ & Guide (₹ INR):*
 ━━━━━━━━━━━━━━━━━━━
-❓ *How do I earn money?*
-• Watch short video & sponsor ads (₹1.50 - ₹3.00 per ad).
-• Claim daily streak login rewards every 24h.
-• Invite friends with your referral link (10% commission).
+❓ *Paise kaise kamayein?*
+• Short sponsored ads dekhein (*₹ 3 - ₹ 5 per ad*).
+• Har 24 ghante me *Daily Bonus* claim karein.
+• Dosto ko invite karein (*₹ 10 / friend + 10% lifetime commission*).
 
-❓ *How do withdrawals work?*
-• Once you reach *500 Coins (₹50.00)*, open the Mini App wallet to request instant payout to your UPI ID (Google Pay, PhonePe, Paytm) or Bank account.
-• Payouts are processed within 24 hours.
+❓ *Withdrawal rules kya hain?*
+• Minimum Payout: *₹ 200.00*
+• Required Referrals: *Kam se kam 3 dosto ko refer karein.*
+• Payouts direct aapke *UPI ID (GPay / PhonePe / Paytm)* ya Bank account me 24 ghante ke andar transfer hote hain.
 
-❓ *Is it safe & legit?*
-• Advertisers pay to sponsor campaigns, and we share the ad revenue directly with you!`;
+❓ *Kya ye safe hai?*
+• Advertisers hume promotions dikhane ke paise dete hain aur hum wahi paisa aapke sath share karte hain!`;
 
     await ctx.replyWithMarkdown(helpMsg, Markup.inlineKeyboard([
       [Markup.button.callback('⬅️ Back to Menu', 'back_home')]

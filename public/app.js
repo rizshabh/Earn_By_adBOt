@@ -383,13 +383,19 @@ async function submitWithdrawal() {
     return;
   }
 
-  if (isNaN(amount) || amount < 500) {
-    showToast('Minimum withdrawal is 500 Coins (₹50.00).');
+  if (isNaN(amount) || amount < 200) {
+    showToast('Minimum withdrawal is ₹ 200.00');
+    return;
+  }
+
+  if (Number(currentUser?.total_referrals || 0) < 3) {
+    const refs = Number(currentUser?.total_referrals || 0);
+    showToast(`Withdrawal unlock karne ke liye 3 referrals chahiye! (Aapke: ${refs}/3)`);
     return;
   }
 
   if (Number(currentUser?.balance || 0) < amount) {
-    showToast('Insufficient balance.');
+    showToast('Insufficient balance (Paisa kam hai).');
     return;
   }
 
