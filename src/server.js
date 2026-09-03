@@ -94,10 +94,10 @@ app.get('/ad/go/:token', async (req, res) => {
         </div>
       </div>
       <script>
-        // Auto-trigger Monetag Ad
+        // Auto-trigger Monetag Rewarded Popup
         window.addEventListener('load', () => {
           if (typeof show_11718056 === 'function') {
-            show_11718056().catch(e => console.log('Monetag ad notice:', e));
+            show_11718056('pop').catch(e => console.log('Monetag ad notice:', e));
           }
         });
 

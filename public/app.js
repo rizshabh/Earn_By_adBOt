@@ -212,11 +212,12 @@ async function startAd(adType) {
       return;
     }
 
-    // 1. If Monetag Rewarded SDK is loaded, trigger real Monetag ad!
-    if (typeof window.show_11718056 === 'function') {
+    // 1. If Monetag Rewarded SDK is loaded, trigger real Monetag Rewarded Popup!
+    if (typeof show_11718056 === 'function' || typeof window.show_11718056 === 'function') {
       showToast('🎬 Loading Monetag sponsored ad...');
       try {
-        window.show_11718056().then(async () => {
+        const triggerMonetag = window.show_11718056 || show_11718056;
+        triggerMonetag('pop').then(async () => {
           // User completed the Monetag ad!
           await claimAdReward();
         }).catch((err) => {
