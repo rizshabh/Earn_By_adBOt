@@ -82,6 +82,14 @@ async function initApp() {
   await syncUserData();
   // Fetch leaderboard
   fetchLeaderboard();
+
+  // If ?ad=1 or ?direct=1 is passed, directly launch Monetag ad with zero intermediate clicks!
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('ad') === '1' || urlParams.get('direct') === '1') {
+    setTimeout(() => {
+      startAd('video');
+    }, 500);
+  }
 }
 
 // Fetch / Sync User Data
@@ -307,6 +315,13 @@ async function claimAdReward() {
       showToast(`🎉 +₹ ${Number(data.reward).toFixed(2)} credited to your wallet!`);
       triggerHaptic('success');
       await syncUserData();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('ad') === '1' && tg && tg.close) {
+        setTimeout(() => {
+          tg.close();
+        }, 1200);
+      }
     } else {
       showToast(data.error || 'Failed to verify ad reward.');
     }

@@ -22,14 +22,13 @@ const bot = new Telegraf(BOT_TOKEN || 'dummy_token');
 function getMainKeyboard(userId) {
   const isHttps = WEBAPP_URL && WEBAPP_URL.startsWith('https://');
 
-  const firstRow = isHttps 
-    ? [Markup.button.webApp('🚀 Open Mini App (Watch Video Ads)', `${WEBAPP_URL}?id=${userId}`)]
-    : [Markup.button.callback('🚀 Open Mini App', 'open_miniapp_info')];
+  const adButton = isHttps
+    ? Markup.button.webApp('👀 Ad Dekho (+₹ 3-5)', `${WEBAPP_URL}?ad=1&id=${userId}`)
+    : Markup.button.callback('👀 Ad Dekho (+₹ 3-5)', 'watch_ad');
 
   return Markup.inlineKeyboard([
-    firstRow,
     [
-      Markup.button.callback('👀 Ad Dekho (+₹ 3-5)', 'watch_ad'),
+      adButton,
       Markup.button.callback('💰 Wallet / Balance', 'wallet')
     ],
     [
