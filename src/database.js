@@ -176,12 +176,15 @@ const db = {
   async startAdSession(telegramId) {
     const tid = String(telegramId);
     const token = 'ad_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    // Dynamic realistic ad rate between ₹3.15 and ₹4.95
+    const dynamicReward = Number((3.15 + Math.random() * 1.75).toFixed(2));
+
     localData.adSessions[token] = {
       telegram_id: tid,
       startTime: Date.now(),
-      reward: 25 // 25 Coins ($0.025)
+      reward: dynamicReward
     };
-    return token;
+    return { token, estimatedReward: dynamicReward };
   },
 
   async completeAdSession(telegramId, token) {
@@ -193,15 +196,15 @@ const db = {
     }
 
     const elapsed = (Date.now() - session.startTime) / 1000;
-    // Require minimum 5 seconds watch time for testing / anti-cheat
+    // Require minimum 4.5 seconds watch time for anti-cheat
     if (elapsed < 4.5) {
-      return { success: false, error: 'Ad skipped too quickly. Please watch till the end!' };
+      return { success: false, error: 'Video khatam hone se pehle band mat karna warna reward nahi milega ⚠️' };
     }
 
     // Delete session token
     delete localData.adSessions[token];
 
-    const reward = session.reward || 25;
+    const reward = Number(session.reward) || 3.85;
     const user = await this.getOrCreateUser(tid);
 
     user.balance = Number((Number(user.balance || 0) + reward).toFixed(2));
@@ -262,7 +265,7 @@ const db = {
 
     if (hoursSince < 20 && lastClaim > 0) {
       const waitHours = Math.ceil(20 - hoursSince);
-      return { success: false, error: `Daily bonus already claimed. Return in ~${waitHours} hours!` };
+      return { success: false, error: `Daily bonus claim ho chuka hai. Agle reward ke liye ~${waitHours} ghante baad aana!` };
     }
 
     // Check streak
@@ -272,9 +275,9 @@ const db = {
       user.daily_streak = ((user.daily_streak || 0) % 7) + 1;
     }
 
-    // Dynamic bonus by streak day: Day 1=20, Day 2=30, ... Day 7=150
-    const bonuses = [20, 30, 45, 60, 80, 100, 150];
-    const bonus = bonuses[user.daily_streak - 1] || 25;
+    // Dynamic bonus in Rupees: Day 1=₹5, Day 2=₹8, Day 3=₹12, Day 4=₹15, Day 5=₹20, Day 6=₹25, Day 7=₹50
+    const bonuses = [5.0, 8.0, 12.0, 15.0, 20.0, 25.0, 50.0];
+    const bonus = bonuses[user.daily_streak - 1] || 5.0;
 
     user.balance = Number((Number(user.balance || 0) + bonus).toFixed(2));
     user.total_earned = Number((Number(user.total_earned || 0) + bonus).toFixed(2));
@@ -297,21 +300,21 @@ const db = {
     const numAmount = Number(amount);
 
     if (isNaN(numAmount) || numAmount <= 0) {
-      return { success: false, error: 'Invalid withdrawal amount' };
+      return { success: false, error: 'Kripya sahi withdrawal amount dalein' };
     }
 
-    // Minimum withdrawal threshold: 500 Coins ($0.50)
-    const MIN_WITHDRAW = 500;
+    // Minimum withdrawal threshold: ₹50.00
+    const MIN_WITHDRAW = 50.0;
     if (numAmount < MIN_WITHDRAW) {
-      return { success: false, error: `Minimum withdrawal is ${MIN_WITHDRAW} Coins.` };
+      return { success: false, error: `Minimum withdrawal ₹${MIN_WITHDRAW.toFixed(2)} hai.` };
     }
 
     if (Number(user.balance || 0) < numAmount) {
-      return { success: false, error: 'Insufficient balance' };
+      return { success: false, error: 'Insufficient balance (Paisa kam hai)' };
     }
 
     if (!address || address.trim().length < 4) {
-      return { success: false, error: 'Please provide a valid wallet or account address.' };
+      return { success: false, error: 'Kripya apna UPI ID ya Account number dalein.' };
     }
 
     user.balance = Number((Number(user.balance) - numAmount).toFixed(2));

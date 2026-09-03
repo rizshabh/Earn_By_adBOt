@@ -63,8 +63,8 @@ app.post('/api/ad/start', async (req, res) => {
       return res.status(400).json({ success: false, error: 'telegram_id is required' });
     }
 
-    const token = await db.startAdSession(telegram_id);
-    res.json({ success: true, token });
+    const sessionInfo = await db.startAdSession(telegram_id);
+    res.json({ success: true, ...sessionInfo });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

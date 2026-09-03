@@ -165,9 +165,16 @@ body {
   filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
 }
 
+.balance-currency-symbol {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--accent-emerald);
+}
+
 .balance-value {
   font-family: var(--font-heading);
-  font-size: 2.5rem;
+  font-size: 2.6rem;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: -0.5px;

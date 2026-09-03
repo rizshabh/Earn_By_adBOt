@@ -33,14 +33,14 @@
 
     <!-- Balance Hero Card -->
     <section class="balance-card">
-      <div class="balance-sub">Current Balance</div>
+      <div class="balance-sub">Available Balance</div>
       <div class="balance-main">
-        <span class="coin-icon">💎</span>
+        <span class="coin-icon">🇮🇳</span>
+        <span class="balance-currency-symbol">₹</span>
         <span class="balance-value" id="userBalance">0.00</span>
-        <span class="currency-tag">COINS</span>
       </div>
       <div class="balance-fiat">
-        ≈ <strong class="inr-highlight">₹<span id="fiatValue">0.00</span> INR</strong>
+        ⚡ Current Ad Rate: <strong class="inr-highlight">₹ 3.00 - ₹ 5.00 / ad</strong>
       </div>
       <div class="balance-stats-row">
         <div class="mini-stat">
@@ -49,8 +49,8 @@
         </div>
         <div class="mini-stat-divider"></div>
         <div class="mini-stat">
-          <span class="stat-label">Total Earned</span>
-          <strong>₹<span id="totalEarnedInr">0.00</span></strong>
+          <span class="stat-label">Total Earning</span>
+          <strong>₹ <span id="totalEarnedInr">0.00</span></strong>
         </div>
         <div class="mini-stat-divider"></div>
         <div class="mini-stat">
@@ -69,7 +69,7 @@
       <section id="tab-earn" class="tab-pane active">
         <div class="section-title">
           <h3>⚡ Watch Ads & Earn</h3>
-          <span class="tag-live">Instant Payout</span>
+          <span class="tag-live">₹ 3-5 / Ad</span>
         </div>
 
         <div class="ad-cards-grid">
@@ -80,7 +80,7 @@
             <div class="earn-card-info">
               <h4>Rewarded Video Ad</h4>
               <p>Watch full 15s sponsored video</p>
-              <div class="card-reward">+25 Coins (₹2.50)</div>
+              <div class="card-reward">+₹ 3.50 - ₹ 5.00</div>
             </div>
             <button class="btn btn-action">Watch</button>
           </div>
@@ -91,7 +91,7 @@
             <div class="earn-card-info">
               <h4>Sponsor Showcase</h4>
               <p>Interactive partner promotional ad</p>
-              <div class="card-reward">+30 Coins (₹3.00)</div>
+              <div class="card-reward">+₹ 3.00 - ₹ 4.50</div>
             </div>
             <button class="btn btn-secondary">View</button>
           </div>
@@ -102,7 +102,7 @@
             <div class="earn-card-info">
               <h4>Quick Ad View</h4>
               <p>Short 5-second sponsor spotlight</p>
-              <div class="card-reward">+15 Coins (₹1.50)</div>
+              <div class="card-reward">+₹ 2.00 - ₹ 3.00</div>
             </div>
             <button class="btn btn-secondary">Start</button>
           </div>
@@ -110,8 +110,8 @@
 
         <!-- Ad Network Integration Box -->
         <div class="ad-network-card">
-          <div class="network-badge">Ad Monetization Ready</div>
-          <p>Instant UPI & Paytm withdrawals with real ad earnings.</p>
+          <div class="network-badge">Instant UPI Transfer</div>
+          <p>⚠️ Video khatam hone se pehle band mat karna warna reward nahi milega.</p>
         </div>
       </section>
 
@@ -119,12 +119,12 @@
       <section id="tab-wallet" class="tab-pane">
         <div class="section-title">
           <h3>💳 Payout & Wallet</h3>
-          <span class="tag-status">Instant Transfer</span>
+          <span class="tag-status">Instant UPI</span>
         </div>
 
         <div class="withdraw-form-card">
           <h4>Request Withdrawal (₹ INR)</h4>
-          <p class="form-desc">Minimum withdrawal is <strong>500 Coins (₹50.00)</strong>.</p>
+          <p class="form-desc">Minimum withdrawal is <strong>₹ 50.00</strong>.</p>
 
           <div class="form-group">
             <label>Payment Method</label>
@@ -138,18 +138,18 @@
 
           <div class="form-group">
             <label id="addressLabel">UPI ID (e.g. mobile@upi / username@okhdfcbank)</label>
-            <input type="text" id="withdrawAddress" placeholder="e.g. UQ... or UPI ID or Wallet" class="input-field">
+            <input type="text" id="withdrawAddress" placeholder="e.g. 9876543210@paytm or name@okaxis" class="input-field">
           </div>
 
           <div class="form-group">
-            <label>Amount (Coins)</label>
+            <label>Amount (₹ INR)</label>
             <div class="input-with-action">
-              <input type="number" id="withdrawAmount" placeholder="Min 500" min="500" class="input-field">
+              <input type="number" id="withdrawAmount" placeholder="Min ₹50" min="50" class="input-field">
               <button class="btn-text-action" onclick="setMaxWithdraw()">MAX</button>
             </div>
           </div>
 
-          <button class="btn btn-primary btn-block" id="btnSubmitWithdraw" onclick="submitWithdrawal()">Request Payout</button>
+          <button class="btn btn-primary btn-block" id="btnSubmitWithdraw" onclick="submitWithdrawal()">Request UPI Payout</button>
         </div>
 
         <div class="history-card">

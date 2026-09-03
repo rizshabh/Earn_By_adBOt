@@ -23,22 +23,22 @@ function getMainKeyboard(userId) {
   const isHttps = WEBAPP_URL && WEBAPP_URL.startsWith('https://');
 
   const firstRow = isHttps 
-    ? [Markup.button.webApp('🚀 Open Mini App (Earn More)', `${WEBAPP_URL}?id=${userId}`)]
-    : [Markup.button.callback('🚀 Open Mini App (Earn More)', 'open_miniapp_info')];
+    ? [Markup.button.webApp('🚀 Open Mini App (Watch Video Ads)', `${WEBAPP_URL}?id=${userId}`)]
+    : [Markup.button.callback('🚀 Open Mini App', 'open_miniapp_info')];
 
   return Markup.inlineKeyboard([
     firstRow,
     [
-      Markup.button.callback('⚡ Quick Ad (+25)', 'watch_ad'),
-      Markup.button.callback('💰 My Wallet', 'wallet')
+      Markup.button.callback('👀 Ad Dekho (+₹ 3-5)', 'watch_ad'),
+      Markup.button.callback('💰 Wallet / Balance', 'wallet')
     ],
     [
       Markup.button.callback('🎁 Daily Bonus', 'daily_bonus'),
-      Markup.button.callback('👥 Refer & Earn', 'referral')
+      Markup.button.callback('👥 Refer & Earn (₹10)', 'referral')
     ],
     [
-      Markup.button.callback('🏆 Leaderboard', 'leaderboard'),
-      Markup.button.callback('ℹ️ FAQ & Help', 'help')
+      Markup.button.callback('🏆 Top Earners', 'leaderboard'),
+      Markup.button.callback('ℹ️ Help & Payouts', 'help')
     ]
   ]);
 }
@@ -60,21 +60,20 @@ bot.start(async (ctx) => {
       referred_by: referredBy
     });
 
-    const balance = Number(user.balance || 0);
-    const inrValue = (balance / 10).toFixed(2);
+    const balance = Number(user.balance || 0).toFixed(2);
 
     const welcomeMsg = 
-`👋 *Welcome to Earn_By_adBOt, ${ctx.from.first_name || 'Friend'}!* 💎
+`👋 *Welcome to EarnZone, ${ctx.from.first_name || 'Friend'}!* 🇮🇳
 
-Earn real cash & rewards by watching short ads, checking in daily, and inviting friends.
+Ads dekh kar direct *UPI & Paytm* me paise kamao!
 
-📊 *Your Account:*
-• 💎 *Balance:* \`${balance.toFixed(2)} Coins\` (≈ *₹${inrValue} INR*)
+📊 *Aapka Account:*
+• 💰 *Available Balance:* \`₹ ${balance}\`
 • 🎬 *Ads Watched:* \`${user.total_ads_watched || 0}\`
 • 🔥 *Daily Streak:* \`${user.daily_streak || 0} days\`
 • 👥 *Referrals:* \`${user.total_referrals || 0}\`
 
-👇 *Choose an option below to start earning:*`;
+👇 *Neeche button dabakar paise kamana shuru karein:*`;
 
     await ctx.replyWithMarkdown(welcomeMsg, getMainKeyboard(telegramId));
   } catch (err) {
@@ -83,33 +82,30 @@ Earn real cash & rewards by watching short ads, checking in daily, and inviting 
   }
 });
 
-// Action: Watch Quick Ad
+// Action: Watch Quick Ad (DhanTube Style)
 bot.action('watch_ad', async (ctx) => {
   try {
-    await ctx.answerCbQuery('🎬 Loading sponsored ad...');
+    await ctx.answerCbQuery('🎬 Ad load ho raha hai...');
     const telegramId = String(ctx.from.id);
 
-    const token = await db.startAdSession(telegramId);
+    const { token, estimatedReward } = await db.startAdSession(telegramId);
 
-    const adMsg = await ctx.replyWithMarkdown(
-`📺 *Sponsored Ad Spotlight:*
-━━━━━━━━━━━━━━━━━━━
-⚡ *Sponsor:* Featured App & Sponsor Spotlight
-💡 *Watch and earn instant coins & INR.*
+    // DhanTube exact notice format
+    await ctx.replyWithMarkdown(
+`📊 *Ek ad dekhne ki current rate: ₹ 3-5*
 
-⏳ _Simulating ad view (5 seconds)..._`
+⚠️ *Video khatam hone se pehle band mat karna warna reward nahi milega*`
     );
 
     setTimeout(async () => {
       // Complete ad
       const res = await db.completeAdSession(telegramId, token);
       if (res.success) {
-        const rewardInr = (res.reward / 10).toFixed(2);
-        const newInr = (res.newBalance / 10).toFixed(2);
+        // DhanTube exact reward popup format: "+₹ 3.87"
         await ctx.replyWithMarkdown(
-`🎉 *Ad Completed!*
-You received *+${res.reward} Coins (₹${rewardInr})*! 💎
-Current Balance: \`${res.newBalance.toFixed(2)} Coins\` (*₹${newInr} INR*)`,
+`*+₹ ${Number(res.reward).toFixed(2)}*
+
+💰 *Total Balance:* \`₹ ${Number(res.newBalance).toFixed(2)}\``,
           getMainKeyboard(telegramId)
         );
       } else {
@@ -129,31 +125,26 @@ bot.action('wallet', async (ctx) => {
     await ctx.answerCbQuery();
     const telegramId = String(ctx.from.id);
     const user = await db.getOrCreateUser(telegramId, { first_name: ctx.from.first_name });
-    const balance = Number(user.balance || 0);
-    const inrValue = (balance / 10).toFixed(2);
-    const totalInr = (Number(user.total_earned || 0) / 10).toFixed(2);
+    const balance = Number(user.balance || 0).toFixed(2);
+    const totalEarned = Number(user.total_earned || 0).toFixed(2);
 
     const walletMsg = 
-`💳 *Your Wallet Overview (₹ INR):*
+`💳 *Aapka Wallet Overview:*
 ━━━━━━━━━━━━━━━━━━━
-💎 *Available Balance:* \`${balance.toFixed(2)} Coins\`
-🇮🇳 *INR Value:* \`₹${inrValue} INR\`
-⚡ *TON Value:* \`${(balance / 3000).toFixed(3)} TON\`
-
-📈 *Earnings Stats:*
-• Total Earned: \`${Number(user.total_earned || 0).toFixed(2)} Coins\` (\`₹${totalInr} INR\`)
-• Ads Watched: \`${user.total_ads_watched || 0}\`
+💰 *Available Balance:* \`₹ ${balance}\`
+📈 *Total Earning:* \`₹ ${totalEarned}\`
+🎬 *Ads Watched:* \`${user.total_ads_watched || 0}\`
 
 📌 *Withdrawal Rules:*
-• Minimum Payout: *500 Coins (₹50.00)*
-• Supported Methods: *UPI (GPay / PhonePe / Paytm), Bank Transfer (IMPS), Crypto*
+• Minimum Payout: *₹ 50.00*
+• Payout Methods: *UPI (GPay / PhonePe / Paytm), Bank Transfer (IMPS)*
 
-👉 Open the Mini App to submit instant UPI withdrawal requests!`;
+👉 *Neeche button dabakar withdrawal request lagayein:*`;
 
     const isHttps = WEBAPP_URL && WEBAPP_URL.startsWith('https://');
     const appBtn = isHttps
-      ? Markup.button.webApp('🚀 Open Wallet in Mini App', `${WEBAPP_URL}?id=${telegramId}`)
-      : Markup.button.callback('🚀 Open Wallet in Mini App', 'open_miniapp_info');
+      ? Markup.button.webApp('🚀 Withdraw via UPI / Paytm', `${WEBAPP_URL}?id=${telegramId}`)
+      : Markup.button.callback('🚀 Withdraw via UPI / Paytm', 'open_miniapp_info');
 
     await ctx.replyWithMarkdown(walletMsg, Markup.inlineKeyboard([
       [appBtn],

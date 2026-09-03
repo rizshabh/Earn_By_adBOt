@@ -118,18 +118,13 @@ async function syncUserData() {
 function updateUI() {
   if (!currentUser) return;
 
-  const balance = Number(currentUser.balance || 0);
-  document.getElementById('userBalance').textContent = balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  
-  // INR Conversion: 10 Coins = ₹1.00 INR (100 Coins = ₹10.00, 500 Coins = ₹50.00)
-  const inrVal = (balance / 10).toFixed(2);
-  const totalEarnedInr = (Number(currentUser.total_earned || 0) / 10).toFixed(2);
+  const balance = Number(currentUser.balance || 0).toFixed(2);
+  const totalEarned = Number(currentUser.total_earned || 0).toFixed(2);
 
-  const fiatEl = document.getElementById('fiatValue');
-  if (fiatEl) fiatEl.textContent = inrVal;
+  document.getElementById('userBalance').textContent = balance;
 
   const earnedInrEl = document.getElementById('totalEarnedInr');
-  if (earnedInrEl) earnedInrEl.textContent = totalEarnedInr;
+  if (earnedInrEl) earnedInrEl.textContent = totalEarned;
 
   document.getElementById('adsToday').textContent = currentUser.ads_watched_today || 0;
   document.getElementById('refCount').textContent = currentUser.total_referrals || 0;
@@ -137,10 +132,10 @@ function updateUI() {
 
   // Referral tab
   document.getElementById('refTotalInvited').textContent = currentUser.total_referrals || 0;
-  const refEarned = (Number(currentUser.total_referrals || 0) * 10).toFixed(0);
+  const refEarned = (Number(currentUser.total_referrals || 0) * 10).toFixed(2);
   document.getElementById('refTotalEarned').textContent = refEarned;
 
-  const botName = window.location.hostname.includes('localhost') ? 'EarnByAdBot' : 'EarnByAdBot';
+  const botName = 'Earn_By_adBOt';
   const refLink = `https://t.me/${botName}?start=ref_${currentUser.telegram_id}`;
   const refLinkInput = document.getElementById('refLinkInput');
   if (refLinkInput) refLinkInput.value = refLink;
@@ -148,13 +143,13 @@ function updateUI() {
   renderStreakCalendar();
 }
 
-// Render Daily Streak 7-Day Grid
+// Render Daily Streak 7-Day Grid (Rupees)
 function renderStreakCalendar() {
   const streakGrid = document.getElementById('streakGrid');
   if (!streakGrid) return;
   streakGrid.innerHTML = '';
 
-  const bonuses = [20, 30, 45, 60, 80, 100, 150];
+  const bonuses = [5.0, 8.0, 12.0, 15.0, 20.0, 25.0, 50.0];
   const currentStreak = Number(currentUser?.daily_streak || 0);
 
   for (let i = 1; i <= 7; i++) {
@@ -169,7 +164,7 @@ function renderStreakCalendar() {
 
     tile.innerHTML = `
       <span class="streak-day">Day ${i}</span>
-      <span class="streak-reward">+${bonuses[i - 1]}</span>
+      <span class="streak-reward">+₹${bonuses[i - 1]}</span>
       <span style="font-size: 0.8rem">${i <= currentStreak ? '✅' : '💎'}</span>
     `;
     streakGrid.appendChild(tile);
@@ -294,7 +289,7 @@ async function claimAdReward() {
     const data = await res.json();
     if (data.success) {
       closeAdModal();
-      showToast(`🎉 Earned +${data.reward} Coins!`);
+      showToast(`🎉 +₹ ${Number(data.reward).toFixed(2)} credited to your wallet!`);
       triggerHaptic('success');
       await syncUserData();
     } else {
@@ -323,7 +318,7 @@ async function claimDailyBonus() {
 
     const data = await res.json();
     if (data.success) {
-      showToast(`🎁 Claimed +${data.reward} Coins! Streak: Day ${data.streak}`);
+      showToast(`🎁 Claimed +₹ ${Number(data.reward).toFixed(2)}! Streak: Day ${data.streak}`);
       triggerHaptic('success');
       await syncUserData();
     } else {
