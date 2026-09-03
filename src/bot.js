@@ -82,16 +82,25 @@ Ads dekh kar direct *UPI & Paytm* me paise kamao!
   }
 });
 
-// Action: Watch Quick Ad (DhanTube Style with real clickable link)
+// Action: Watch Quick Ad (DhanTube Style with safe URL check)
 bot.action('watch_ad', async (ctx) => {
   try {
     await ctx.answerCbQuery('🎬 Ad link taiyar ho raha hai...');
     const telegramId = String(ctx.from.id);
 
     const { token, estimatedReward } = await db.startAdSession(telegramId);
-    const adUrl = `${WEBAPP_URL || 'http://localhost:3000'}/ad/go/${token}`;
+    
+    // Check if a valid public URL is available for button.url
+    const directUrl = process.env.DIRECT_AD_URL;
+    let publicAdUrl = null;
 
-    // DhanTube exact notice format with clickable ad button
+    if (directUrl && (directUrl.startsWith('http://') || directUrl.startsWith('https://'))) {
+      publicAdUrl = directUrl;
+    } else if (WEBAPP_URL && (WEBAPP_URL.startsWith('http://') || WEBAPP_URL.startsWith('https://')) && !WEBAPP_URL.includes('localhost')) {
+      publicAdUrl = `${WEBAPP_URL}/ad/go/${token}`;
+    }
+
+    // DhanTube exact notice format
     const adMsg = 
 `📊 *Ek ad dekhne ki current rate: ₹ 3-5*
 
@@ -99,10 +108,12 @@ bot.action('watch_ad', async (ctx) => {
 
 👇 *Neeche diye gaye button par click karke Ad dekhein:*`;
 
+    const adRow = publicAdUrl
+      ? [Markup.button.url(`🎬 Ad Dekho / Open Link (₹ ${estimatedReward.toFixed(2)})`, publicAdUrl)]
+      : [Markup.button.callback(`🎬 Ad Play Karein (₹ ${estimatedReward.toFixed(2)})`, `play_${token}`)];
+
     const adButtons = Markup.inlineKeyboard([
-      [
-        Markup.button.url(`🎬 Ad Dekho / Open Link (₹ ${estimatedReward.toFixed(2)})`, adUrl)
-      ],
+      adRow,
       [
         Markup.button.callback(`✅ Claim Reward (+₹ ${estimatedReward.toFixed(2)})`, `claim_${token}`)
       ],
@@ -114,7 +125,37 @@ bot.action('watch_ad', async (ctx) => {
     await ctx.replyWithMarkdown(adMsg, adButtons);
   } catch (err) {
     console.error('Error in watch_ad:', err);
-    ctx.reply('Failed to load ad. Please try again.');
+    ctx.reply('⚠️ Ad load karne me samasya aayi. Kripya dobara try karein.');
+  }
+});
+
+// Action: Play Ad inside bot (when no external URL is set)
+bot.action(/^play_(.+)$/, async (ctx) => {
+  try {
+    const token = ctx.match[1];
+    const telegramId = String(ctx.from.id);
+    await ctx.answerCbQuery('🎬 Video ad chal raha hai (5 seconds)...');
+
+    await ctx.replyWithMarkdown(
+`⏳ *Sponsored Video Ad Chal Raha Hai...*
+━━━━━━━━━━━━━━━━━━━
+⚡ *Monetag / Ad Network Campaign*
+💡 _5 seconds me ad pura ho jayega._`
+    );
+
+    setTimeout(async () => {
+      const res = await db.completeAdSession(telegramId, token);
+      if (res.success) {
+        await ctx.replyWithMarkdown(
+`*+₹ ${Number(res.reward).toFixed(2)}*
+
+💰 *Total Balance:* \`₹ ${Number(res.newBalance).toFixed(2)}\``,
+          getMainKeyboard(telegramId)
+        );
+      }
+    }, 5000);
+  } catch (err) {
+    console.error('Error in play ad:', err);
   }
 });
 
@@ -137,9 +178,9 @@ bot.action(/^claim_(.+)$/, async (ctx) => {
     } else {
       await ctx.answerCbQuery('⚠️ ' + res.error, { show_alert: true });
       await ctx.replyWithMarkdown(
-`⚠️ *Notice:* ${res.error}\n\n_Kripya link par click karke pura ad dekhein._`,
+`⚠️ *Notice:* ${res.error}\n\n_Kripya ad pura dekh kar claim karein._`,
         Markup.inlineKeyboard([
-          [Markup.button.url('🎬 Ad Dubara Kholein', `${WEBAPP_URL || 'http://localhost:3000'}/ad/go/${token}`)],
+          [Markup.button.callback('🎬 Ad Dubara Play Karein (5s)', `play_${token}`)],
           [Markup.button.callback('✅ Claim Karein', `claim_${token}`)]
         ])
       );
@@ -344,13 +385,14 @@ bot.action('back_home', async (ctx) => {
     const user = await db.getOrCreateUser(telegramId, { first_name: ctx.from.first_name });
 
     const welcomeMsg = 
-`👋 *Earn_By_adBOt Dashboard* 💎
+`👋 *EarnZone Dashboard* 🇮🇳
 
-💎 *Balance:* \`${Number(user.balance || 0).toFixed(2)} Coins\`
+💰 *Available Balance:* \`₹ ${Number(user.balance || 0).toFixed(2)}\`
 🎬 *Ads Watched:* \`${user.total_ads_watched || 0}\`
 🔥 *Streak:* \`${user.daily_streak || 0} days\`
+👥 *Referrals:* \`${user.total_referrals || 0}\`
 
-Choose an option below:`;
+👇 *Neeche option choose karein:*`;
 
     await ctx.replyWithMarkdown(welcomeMsg, getMainKeyboard(telegramId));
   } catch (err) {
